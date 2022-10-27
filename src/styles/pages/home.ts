@@ -9,6 +9,8 @@ export const HomeContainer = styled("main", {
 });
 
 export const Product = styled("a", {
+  minWidth: 696,
+  maxWidth: 696,
   background: "linear-gradient(180deg, #1ea483 0%, #7465d4 100%)",
   borderRadius: 8,
   cursor: "pointer",
@@ -41,15 +43,21 @@ export const Product = styled("a", {
     opacity: 0,
     transition: "all 200ms ease-in-out",
 
-    strong: {
-      fontSize: "$lg",
-      color: "$gray100",
-    },
+    div: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 4,
 
-    span: {
-      fontSize: "$xl",
-      fontWeight: "bold",
-      color: "$green300",
+      strong: {
+        fontSize: "$lg",
+        color: "$gray100",
+      },
+
+      span: {
+        fontSize: "$xl",
+        fontWeight: "bold",
+        color: "$green300",
+      },
     },
   },
 
