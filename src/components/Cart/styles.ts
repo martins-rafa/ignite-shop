@@ -20,6 +20,11 @@ export const CartContent = styled(Dialog.Content, {
     color: "$gray100",
     marginBottom: "2rem",
   },
+
+  "& > section": {
+    overflowY: "auto",
+    marginBottom: "2rem",
+  },
 });
 
 export const CartClose = styled(Dialog.Close, {
@@ -40,6 +45,10 @@ export const CartProductCard = styled("div", {
   gap: "1.25rem",
   alignItems: "center",
   height: "5.8125rem",
+
+  "&:not(:last-child)": {
+    marginBottom: "2rem",
+  },
 });
 
 export const CartProductImageContainer = styled("div", {
