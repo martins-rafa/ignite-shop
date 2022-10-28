@@ -10,14 +10,11 @@ import Stripe from "stripe";
 import Link from "next/link";
 import Head from "next/head";
 import { CartButton } from "../components/CartButton";
+import { MouseEvent, useContext } from "react";
+import { CartContext, ProductProps } from "../contexts/CartContext";
 
 interface HomeProps {
-  products: {
-    id: string;
-    name: string;
-    imageUrl: string;
-    price: string;
-  }[];
+  products: ProductProps[];
 }
 
 export default function Home({ products }: HomeProps) {
@@ -27,6 +24,16 @@ export default function Home({ products }: HomeProps) {
       spacing: 48,
     },
   });
+
+  const { addToCart, checkIfProductIsAlreadyInCart } = useContext(CartContext);
+
+  function handleAddToCart(
+    e: MouseEvent<HTMLButtonElement>,
+    product: ProductProps
+  ) {
+    e.preventDefault();
+    addToCart(product);
+  }
 
   return (
     <>
@@ -51,7 +58,12 @@ export default function Home({ products }: HomeProps) {
                     <span>{product.price}</span>
                   </div>
 
-                  <CartButton size="large" bgColor="green" />
+                  <CartButton
+                    size="large"
+                    bgColor="green"
+                    disabled={checkIfProductIsAlreadyInCart(product.id)}
+                    onClick={(e) => handleAddToCart(e, product)}
+                  />
                 </footer>
               </Product>
             </Link>
@@ -78,6 +90,8 @@ export const getStaticProps: GetStaticProps = async () => {
         style: "currency",
         currency: "USD",
       }).format(price.unit_amount / 100),
+      numberPrice: price.unit_amount / 100,
+      defaultPriceId: price.id,
     };
   });
 
