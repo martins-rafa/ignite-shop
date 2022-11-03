@@ -1,7 +1,6 @@
 import { GetStaticPaths, GetStaticProps } from "next";
 import Image from "next/future/image";
 import { useRouter } from "next/router";
-import axios from "axios";
 import Stripe from "stripe";
 import { stripe } from "../../lib/stripe";
 import {
@@ -9,8 +8,9 @@ import {
   ProductContainer,
   ProductDetails,
 } from "../../styles/pages/product";
-import { useState } from "react";
+import { useContext } from "react";
 import Head from "next/head";
+import { CartContext } from "../../contexts/CartContext";
 
 interface ProductProps {
   product: {
@@ -18,6 +18,7 @@ interface ProductProps {
     name: string;
     imageUrl: string;
     price: string;
+    numberPrice: number;
     description: string;
     defaultPriceId: string;
   };
@@ -25,33 +26,13 @@ interface ProductProps {
 
 export default function Product({ product }: ProductProps) {
   const { isFallback } = useRouter();
-  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
-    useState(false);
+  const { addToCart, checkIfProductIsAlreadyInCart } = useContext(CartContext);
 
   if (isFallback) {
     return <p>Loading...</p>;
   }
 
-  async function handleBuyProduct() {
-    try {
-      setIsCreatingCheckoutSession(true);
-
-      const response = await axios.post("/api/checkout", {
-        priceId: product.defaultPriceId,
-      });
-
-      const { checkoutUrl } = response.data;
-
-      window.location.href = checkoutUrl;
-    } catch (error) {
-      // conectar com uma ferramenta de observabilidade (Datadog/ Sentry)
-      setIsCreatingCheckoutSession(false);
-
-      alert(
-        "Something went wrong! We could not redirect you to the checkout page"
-      );
-    }
-  }
+  const isProductInCart = checkIfProductIsAlreadyInCart(product.id);
 
   return (
     <>
@@ -70,11 +51,8 @@ export default function Product({ product }: ProductProps) {
 
           <p>{product.description}</p>
 
-          <button
-            disabled={isCreatingCheckoutSession}
-            onClick={handleBuyProduct}
-          >
-            Buy now
+          <button disabled={isProductInCart} onClick={() => addToCart(product)}>
+            {isProductInCart ? "Product already in your cart" : "Add to cart"}
           </button>
         </ProductDetails>
       </ProductContainer>
@@ -110,6 +88,7 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({
           style: "currency",
           currency: "USD",
         }).format(price.unit_amount / 100),
+        numberPrice: price.unit_amount / 100,
         description: product.description,
         defaultPriceId: price.id,
       },
