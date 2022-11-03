@@ -12,17 +12,37 @@ import {
   CartProductImageContainer,
 } from "./styles";
 
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { CartContext } from "../../contexts/CartContext";
+import axios from "axios";
 
 export function Cart() {
   const { cart, removeFromCart, cartTotalPrice } = useContext(CartContext);
   const cartTotalQuantity = cart.length;
 
+  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
+    useState(false);
+
   const formattedTotalPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(cartTotalPrice);
+
+  async function handleBuyProducts() {
+    try {
+      setIsCreatingCheckoutSession(true);
+
+      const response = await axios.post("/api/checkout", {
+        products: cart,
+      });
+
+      const { checkoutUrl } = response.data;
+      window.location.href = checkoutUrl;
+    } catch (error) {
+      setIsCreatingCheckoutSession(false);
+      alert("Something went wrong :( Please try again later");
+    }
+  }
 
   return (
     <Dialog.Root>
@@ -85,7 +105,12 @@ export function Cart() {
                 <p>{formattedTotalPrice}</p>
               </div>
             </CartFooterDetails>
-            <button>Buy</button>
+            <button
+              onClick={handleBuyProducts}
+              disabled={isCreatingCheckoutSession || cartTotalQuantity < 1}
+            >
+              Buy
+            </button>
           </CartFooter>
         </CartContent>
       </Dialog.Portal>
